@@ -6,6 +6,7 @@
 #include "Cmd/Fmt.hpp"
 #include "Cmd/Help.hpp"
 #include "Cmd/Init.hpp"
+#include "Cmd/Install.hpp"
 #include "Cmd/Lint.hpp"
 #include "Cmd/New.hpp"
 #include "Cmd/Remove.hpp"

@@ -67,6 +67,7 @@ const Cli& getCli() noexcept {
           .addSubcmd(FMT_CMD)
           .addSubcmd(HELP_CMD)
           .addSubcmd(INIT_CMD)
+          .addSubcmd(INSTALL_CMD)
           .addSubcmd(LINT_CMD)
           .addSubcmd(NEW_CMD)
           .addSubcmd(REMOVE_CMD)

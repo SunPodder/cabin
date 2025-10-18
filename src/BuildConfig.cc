@@ -485,6 +485,11 @@ void BuildConfig::setVariables() {
   defineSimpleVar(
       "LIBS",
       fmt::format("{}", fmt::join(project.compilerOpts.ldFlags.libs, " ")));
+
+  defineCondVar("PREFIX", "/usr/local");
+  defineCondVar("DESTDIR", "");
+  defineCondVar("INSTALL", "install");
+  defineCondVar("LIBDIR", "lib");
 }
 
 Result<void>
@@ -743,6 +748,35 @@ Result<void> BuildConfig::configureBuild() {
                { "tidy_%: %" });
   addPhony("tidy");
   addPhony("$(TIDY_TARGETS)");
+
+  // Install targets
+  std::unordered_set<std::string> installDeps;
+  if (hasBinaryTarget) {
+    const std::string binPath =
+        (outBasePath / project.manifest.package.name).string();
+    const std::vector<std::string> installBinCmds = {
+      "@mkdir -p $(DESTDIR)$(PREFIX)/bin",
+      fmt::format("$(INSTALL) -m 0755 {} $(DESTDIR)$(PREFIX)/bin", binPath)
+    };
+    defineTarget("install-bin", installBinCmds, { binPath });
+    addPhony("install-bin");
+    installDeps.insert("install-bin");
+  }
+  if (hasLibraryTarget) {
+    const std::string libPath = (outBasePath / libName).string();
+    const std::vector<std::string> installLibCmds = {
+      "@mkdir -p $(DESTDIR)$(PREFIX)/$(LIBDIR)",
+      fmt::format("$(INSTALL) -m 0644 {} $(DESTDIR)$(PREFIX)/$(LIBDIR)",
+                  libPath)
+    };
+    defineTarget("install-lib", installLibCmds, { libPath });
+    addPhony("install-lib");
+    installDeps.insert("install-lib");
+  }
+  if (!installDeps.empty()) {
+    defineTarget("install", {}, installDeps);
+    addPhony("install");
+  }
   return Ok();
 }
 
